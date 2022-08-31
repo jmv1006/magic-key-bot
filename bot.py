@@ -77,8 +77,7 @@ class MyClient(discord.Client):
 
             await self.channel.send('These are the dates being watched: ')
 
-            for date in dates:
-                await self.channel.send(date)
+            await self.channel.send(dates)
         
         if message.content == "/watch/remove":
             dates = watcher.dates_being_watched
