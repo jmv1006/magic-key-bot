@@ -6,7 +6,6 @@ from watcher import Watcher
 
 watcher = Watcher()
 response_handler = ResponseHandler("inspire")
-
 bot_token = os.getenv("BOT_TOKEN")
 
 class MyClient(discord.Client):            
@@ -14,13 +13,15 @@ class MyClient(discord.Client):
     async def myLoop(self):
         dates = watcher.dates_being_watched
         if dates:
-            watcher.check_if_available()
+            available_dates = watcher.check_if_available()
+            if available_dates:
+                for date in available_dates:
+                    await self.channel.send(date + " is now available.")
     
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
         self.channel = self.get_channel(1008853405751590915)
         self.myLoop.start()
-
 
     async def on_message(self, message):
         if message.content == 'ping':
@@ -35,7 +36,7 @@ class MyClient(discord.Client):
 
             availability = response_handler.get_specific_date(date)
 
-            if(not availability): return await self.channel.send("Date Not Available.")
+            if not availability: return await self.channel.send("Date Not Available.")
 
             else:
                 availabile_parks = []
@@ -55,8 +56,8 @@ class MyClient(discord.Client):
 
             if len(date) != 3: return await self.channel.send("Wrong format. Please Try again.")
 
-            year = date[2]
             month = date[0]
+            year = date[2]
             day = date[1]
 
             formatted_date_list = [year, month, day]
@@ -69,6 +70,34 @@ class MyClient(discord.Client):
             else:
                 await self.channel.send("That date is not available. I will watch it for you!")
                 watcher.add_date(formatted_date)
+        
+        if message.content == "/watch/view":
+            dates = watcher.dates_being_watched
+            if not dates: return await self.channel.send("No dates are being watched.")
+
+            await self.channel.send('These are the dates being watched: ')
+
+            for date in dates:
+                await self.channel.send(date)
+        
+        if message.content == "/watch/remove":
+            dates = watcher.dates_being_watched
+            if not dates: return await self.channel.send("No dates are being watched.")
+
+            await self.channel.send('These are the dates being watched: ')
+
+            for date in dates:
+                await self.channel.send(date)
+            
+            await self.channel.send("Which date would you like to remove? Enter it as shown above.")
+
+            msg = await self.wait_for("message")
+            if msg.content in watcher.dates_being_watched:
+                watcher.dates_being_watched.remove(msg.content)
+                await self.channel.send("Successfully removed date from watched list.")
+            else:
+                await self.channel.send("Could not remove date from list. Ensure that date was inputted properly.")
+
 
 client = MyClient()
 client.run(bot_token)

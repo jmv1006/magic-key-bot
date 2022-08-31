@@ -9,6 +9,7 @@ class AvailableDate:
         self.parks.append(park)
 
 
+##available dates: '01-01-2023' : [Disneyland, Disney California Adventure]
 class ResponseHandler:
     def __init__(self, key):
         self.key = key
