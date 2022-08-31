@@ -33,8 +33,9 @@ class ResponseHandler:
         result = {} 
         for date in available:
             result[date.date] = date.parks
-            if len(result) >= 60: return result
+            if len(result) >= 90: return result
         
+        self.available_dates = result
         return result
 
     def get_specific_date(self, date):
